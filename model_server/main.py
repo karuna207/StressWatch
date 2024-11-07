@@ -2,23 +2,24 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
-import tensorflow as tf
+import onnxruntime as ort
 from model.preprocess import preprocess_input
 from pydantic import BaseModel
 
 app = FastAPI()
 
-# Allow CORS (Cross-Origin Resource Sharing)
+# Allow CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust as needed for your frontend
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load the trained model
-model = tf.keras.models.load_model("model/your_model.h5")
+# Load the ONNX model
+onnx_model_path = "model/model_combined_cleaned.onnx"  # Ensure this path is correct
+ort_session = ort.InferenceSession(onnx_model_path)
 
 class InputData(BaseModel):
     input: list  # Adjust the type according to your input structure
@@ -29,11 +30,14 @@ async def predict(data: InputData):
         # Preprocess the input data
         processed_data = preprocess_input(data.input)
         
+        # Convert input to the format expected by ONNX (usually np.float32)
+        inputs = {ort_session.get_inputs()[0].name: processed_data.astype(np.float32)}
+
         # Make prediction
-        prediction = model.predict(processed_data)
+        prediction = ort_session.run(None, inputs)
         
-        # Assuming the model output needs further processing
-        result = prediction.tolist()  # Convert numpy array to list for JSON response
+        # Convert the output to a list for JSON serialization
+        result = prediction[0].tolist()
         
         return {"prediction": result}
     except Exception as e:
@@ -41,4 +45,4 @@ async def predict(data: InputData):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000)  # Change port as needed
+    uvicorn.run(app, host="0.0.0.0", port=5000)
