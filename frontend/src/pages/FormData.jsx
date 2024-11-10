@@ -16,8 +16,6 @@ const FormData = () => {
     sleepDuration: '',
     heartRate: '',
     dailySteps: '',
-    highestBP: '',
-    lowestBP: '',
   });
 
   // Handle change for each input
@@ -43,8 +41,6 @@ const FormData = () => {
       sleepDuration: parseFloat(formData.sleepDuration),
       heartRate: parseFloat(formData.heartRate),
       dailySteps: parseInt(formData.dailySteps, 10),
-      highestBP: parseInt(formData.highestBP, 10),
-      lowestBP: parseInt(formData.lowestBP, 10),
   }; 
   console.log(formattedData)
 
@@ -68,8 +64,7 @@ const FormData = () => {
           sleepDuration: '',
           heartRate: '',
           dailySteps: '',
-          highestBP: '',
-          lowestBP: '',
+
         }); // Clear the form 
         console.log('Form submitted:', formData);
       } else {
@@ -221,39 +216,7 @@ const FormData = () => {
             />
           </div>
 
-          {/* Highest BP */}
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="highestBP">
-              Highest BP
-            </label>
-            <input
-              name="highestBP"
-              value={formData.highestBP}
-              onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="highestBP"
-              type="number"
-              placeholder="Highest BP" 
-              required
-            />
-          </div>
-
-          {/* Lowest BP */}
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lowestBP">
-              Lowest BP
-            </label>
-            <input
-              name="lowestBP"
-              value={formData.lowestBP}
-              onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="lowestBP"
-              type="number"
-              placeholder="Lowest BP" 
-              required
-            />
-          </div>
+         
         </div>
 
         <div className="flex items-center justify-between mt-6">
