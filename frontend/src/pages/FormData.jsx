@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react'; 
+import axios from 'axios'; // import axios if not already
+import { Context } from "../context/context.jsx"; 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const FormData = () => {
-  // Initialize state with default values for each input field
-  const [formData, setFormData] = useState({
+  // Initialize state with default values for each input field 
+  const { backendUrl, navigate } = useContext(Context);
+  const [formData, setformData] = useState({
     snoringRate: '',
     respirationRate: '',
     bodyTemperature: '',
@@ -18,23 +23,69 @@ const FormData = () => {
   // Handle change for each input
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
+    setformData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();   
+    console.log(formData);
+
+    const formattedData = {
+      snoringRate: parseFloat(formData.snoringRate),
+      respirationRate: parseFloat(formData.respirationRate),
+      bodyTemperature: parseFloat(formData.bodyTemperature),
+      oxygenLevel: parseFloat(formData.oxygenLevel),
+      eyeMovement: parseFloat(formData.eyeMovement),
+      sleepDuration: parseFloat(formData.sleepDuration),
+      heartRate: parseFloat(formData.heartRate),
+      dailySteps: parseInt(formData.dailySteps, 10),
+      highestBP: parseInt(formData.highestBP, 10),
+      lowestBP: parseInt(formData.lowestBP, 10),
+  }; 
+  console.log(formattedData)
+
+
+    try {
+      const response = await axios.post(backendUrl+'/predict', formattedData); 
+
+
+      console.log("hi")
+
+      if (response.status === 200) {
+        toast.success('Form submitted successfully!');  
+        console.log('Response from model server:', response.data.prediction); 
+        console.log(formData);
+        setformData({ 
+          snoringRate: '',
+          respirationRate: '',
+          bodyTemperature: '',
+          oxygenLevel: '',
+          eyeMovement: '',
+          sleepDuration: '',
+          heartRate: '',
+          dailySteps: '',
+          highestBP: '',
+          lowestBP: '',
+        }); // Clear the form 
+        console.log('Form submitted:', formData);
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error('Error submitting form. Please check console for details.');
+    }
   };
 
   return (
     <div className="flex justify-center pt-20">
       <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/** Snoring Rate */}
+          {/* Snoring Rate */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="snoringRate">
               Snoring Rate
@@ -46,11 +97,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="snoringRate"
               type="number"
-              placeholder="Snoring Rate"
+              placeholder="Snoring Rate" 
+              required
             />
           </div>
 
-          {/** Respiration Rate */}
+          {/* Respiration Rate */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="respirationRate">
               Respiration Rate
@@ -62,11 +114,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="respirationRate"
               type="number"
-              placeholder="Respiration Rate"
+              placeholder="Respiration Rate" 
+              required
             />
           </div>
 
-          {/** Body Temperature */}
+          {/* Body Temperature */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="bodyTemperature">
               Body Temperature
@@ -78,11 +131,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="bodyTemperature"
               type="number"
-              placeholder="Body Temperature"
+              placeholder="Body Temperature" 
+              required
             />
           </div>
 
-          {/** Body Oxygen Level */}
+          {/* Body Oxygen Level */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="oxygenLevel">
               Body Oxygen Level
@@ -94,11 +148,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="oxygenLevel"
               type="number"
-              placeholder="Body Oxygen Level"
+              placeholder="Body Oxygen Level" 
+              required
             />
           </div>
 
-          {/** Eye Movement */}
+          {/* Eye Movement */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="eyeMovement">
               Eye Movement
@@ -110,11 +165,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="eyeMovement"
               type="number"
-              placeholder="Eye Movement"
+              placeholder="Eye Movement" 
+              required
             />
           </div>
 
-          {/** Sleep Duration */}
+          {/* Sleep Duration */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="sleepDuration">
               Sleep Duration
@@ -126,11 +182,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="sleepDuration"
               type="number"
-              placeholder="Sleep Duration"
+              placeholder="Sleep Duration" 
+              required
             />
           </div>
 
-          {/** Heart Rate */}
+          {/* Heart Rate */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="heartRate">
               Heart Rate
@@ -142,11 +199,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="heartRate"
               type="number"
-              placeholder="Heart Rate"
+              placeholder="Heart Rate" 
+              required
             />
           </div>
 
-          {/** Daily Steps */}
+          {/* Daily Steps */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dailySteps">
               Daily Steps
@@ -158,11 +216,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="dailySteps"
               type="number"
-              placeholder="Daily Steps"
+              placeholder="Daily Steps" 
+              required
             />
           </div>
 
-          {/** Highest BP */}
+          {/* Highest BP */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="highestBP">
               Highest BP
@@ -174,11 +233,12 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="highestBP"
               type="number"
-              placeholder="Highest BP"
+              placeholder="Highest BP" 
+              required
             />
           </div>
 
-          {/** Lowest BP */}
+          {/* Lowest BP */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lowestBP">
               Lowest BP
@@ -190,7 +250,8 @@ const FormData = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="lowestBP"
               type="number"
-              placeholder="Lowest BP"
+              placeholder="Lowest BP" 
+              required
             />
           </div>
         </div>
@@ -205,7 +266,7 @@ const FormData = () => {
         </div>
       </form>
     </div>
-  );
+  ); 
 };
 
 export default FormData;

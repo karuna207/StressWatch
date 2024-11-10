@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
@@ -8,7 +7,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Allow CORS
+# Set up CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,32 +16,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load the ONNX model
-onnx_model_path = "model/model_combined_cleaned.onnx"  # Ensure this path is correct
+# Load ONNX model
+onnx_model_path = "model/model_combined_cleaned.onnx"
 ort_session = ort.InferenceSession(onnx_model_path)
 
+# Define input schema
 class InputData(BaseModel):
-    input: list  # Adjust the type according to your input structure
+    snoringRate: float
+    respirationRate: float
+    bodyTemperature: float
+    oxygenLevel: float
+    eyeMovement: float
+    sleepDuration: float
+    heartRate: float
+    dailySteps: int
+    highestBP: int
+    lowestBP: int
 
+# Root endpoint
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the prediction API!"}
+
+# Prediction endpoint
 @app.post("/predict")
-async def predict(data: InputData):
+async def predict(data: InputData): 
     try:
-        # Preprocess the input data
-        processed_data = preprocess_input(data.input)
+        # Convert input data to a dictionary 
+        print(data)
+        input_data = data.dict() 
+        print(input_data)
         
-        # Convert input to the format expected by ONNX (usually np.float32)
-        inputs = {ort_session.get_inputs()[0].name: processed_data.astype(np.float32)}
+        # Preprocess the input data
+        processed_data = preprocess_input(input_data) 
 
-        # Make prediction
+        print(processed_data)
+        
+        # Prepare input for ONNX runtime
+        inputs = {ort_session.get_inputs()[0].name: np.array(processed_data).astype(np.float32)} 
+
+        print(inputs)
+        
+        # Run the prediction
         prediction = ort_session.run(None, inputs)
         
-        # Convert the output to a list for JSON serialization
+        # Get prediction result
         result = prediction[0].tolist()
         
         return {"prediction": result}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error during prediction: {str(e)}")
 
+# Run the app
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000)
